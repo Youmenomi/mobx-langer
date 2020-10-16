@@ -1,0 +1,81 @@
+{
+  "name": "mobx-langer",
+  "version": "0.0.0",
+  "description": "",
+  "keywords": [
+    "mobx",
+    "typescript",
+    "intl",
+    "Localization",
+    "globalization",
+    "translation",
+    "multi-language"
+  ],
+  "main": "dist/cjs/mobx-langer.cjs.js",
+  "module": "dist/esm/mobx-langer.esm.js",
+  "types": "src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "jest",
+    "build:js": "rollup -c",
+    "build:clean": "del dist",
+    "build": "eslint --ext .ts,.js ./src && npm run build:clean && npm run build:js",
+    "release": "np",
+    "version": "npm run build"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "prettier --write",
+      "eslint --fix",
+      "jest --bail --findRelatedTests"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Youmenomi/mobx-langer.git"
+  },
+  "author": "Dean Yao <youmenomi@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Youmenomi/mobx-langer/issues"
+  },
+  "homepage": "https://github.com/Youmenomi/mobx-langer#readme",
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-proposal-decorators": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-typescript": "^7.12.1",
+    "@types/jest": "^26.0.14",
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.5.2",
+    "del-cli": "^3.0.1",
+    "eslint": "^7.11.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.3.0",
+    "jest": "^26.5.3",
+    "lint-staged": "^10.4.0",
+    "mobx": "^6.0.1",
+    "np": "^6.5.0",
+    "prettier": "^2.1.2",
+    "rollup": "^2.31.0",
+    "rollup-simple-configer": "^0.1.1",
+    "ts-jest": "^26.4.1",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "langer": "^0.0.3"
+  },
+  "peerDependencies": {
+    "mobx": "^6.0.1"
+  }
+}
