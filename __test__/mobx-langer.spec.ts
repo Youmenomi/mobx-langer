@@ -1,4 +1,4 @@
-import { autorun } from 'mobx';
+import { autorun, configure } from 'mobx';
 import { MobxLanger, presetLanguage } from '../src';
 import {
   AsyncDriver,
@@ -7,8 +7,6 @@ import {
   presetSaved,
   setSaved,
 } from './helper';
-
-const env = process.env;
 
 const fetched = {
   en: {
@@ -62,11 +60,7 @@ const updated = {
   },
 } as const;
 
-describe('mobxLanger', () => {
-  const warn = jest
-    .spyOn(global.console, 'warn')
-    .mockImplementation(() => true);
-
+describe('mobx-langer', () => {
   jest
     .spyOn(Object.getPrototypeOf(localStorage) as Storage, 'getItem')
     .mockImplementation((name: string) => {
@@ -85,13 +79,7 @@ describe('mobxLanger', () => {
     });
 
   beforeEach(() => {
-    process.env = { ...env };
-    warn.mockClear();
     clearSaved();
-  });
-
-  afterAll(() => {
-    process.env = env;
   });
 
   it('presetLanguage', () => {
@@ -107,92 +95,89 @@ describe('mobxLanger', () => {
   it('normal', async () => {
     presetSaved('zh');
 
-    const mobxLanger = new MobxLanger<typeof fetched>();
-    expect(mobxLanger.initialized).toBeFalsy();
-    await mobxLanger.initialize(fetched);
-    expect(mobxLanger.initialized).toBeTruthy();
-    expect(mobxLanger.availableLanguages).toEqual(Object.keys(fetched));
+    const langer = new MobxLanger<typeof fetched>();
+    expect(langer.initialized).toBeFalsy();
+    await langer.initialize(fetched);
+    expect(langer.initialized).toBeTruthy();
+    expect(langer.availableLanguages).toEqual(Object.keys(fetched));
 
-    expect(mobxLanger.speaking).toBe('zh');
-    expect(mobxLanger.says.cancel).toBe(fetched.zh.cancel);
-    expect(mobxLanger.says.setting.language).toBe(fetched.zh.setting.language);
+    expect(langer.speaking).toBe('zh');
+    expect(langer.says.cancel).toBe(fetched.zh.cancel);
+    expect(langer.says.setting.language).toBe(fetched.zh.setting.language);
 
-    expect(await mobxLanger.resetLanguage()).toBe(presetResult);
+    expect(await langer.resetLanguage()).toBe(presetResult);
 
-    expect(mobxLanger.speaking).toEqual(presetResult);
-    expect(mobxLanger.says.cancel).toBe(fetched.en.cancel);
-    expect(mobxLanger.says.setting.language).toBe(fetched.en.setting.language);
+    expect(langer.speaking).toEqual(presetResult);
+    expect(langer.says.cancel).toBe(fetched.en.cancel);
+    expect(langer.says.setting.language).toBe(fetched.en.setting.language);
 
-    await mobxLanger.speak('zh');
-    expect(mobxLanger.speaking).toBe('zh');
-    expect(mobxLanger.says.cancel).toBe(fetched.zh.cancel);
-    expect(mobxLanger.says.setting.language).toBe(fetched.zh.setting.language);
+    await langer.speak('zh');
+    expect(langer.speaking).toBe('zh');
+    expect(langer.says.cancel).toBe(fetched.zh.cancel);
+    expect(langer.says.setting.language).toBe(fetched.zh.setting.language);
 
-    const updatedLanger = await mobxLanger.update(updated);
-    expect(mobxLanger === updatedLanger).toBeTruthy();
+    const updatedLanger = await langer.update(updated);
+    //@ts-expect-error
+    expect(langer === updatedLanger).toBeTruthy();
     expect(updatedLanger.speaking).toBe('zh');
     expect(updatedLanger.says.enter).toBe(updated.zh.enter);
     expect(updatedLanger.says.setting.quality).toBe(updated.zh.setting.quality);
 
     updatedLanger.dispose();
-    expect(mobxLanger.dispoed).toBeTruthy();
-    expect(() => mobxLanger.availableLanguages).toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    expect(langer.disposed).toBeTruthy();
+    expect(() => langer.availableLanguages).toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    expect(() => mobxLanger.speaking).toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    expect(() => langer.speaking).toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    expect(() => mobxLanger.says).toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    expect(() => langer.says).toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    await expect(async () => await mobxLanger.speak('en')).rejects.toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    await expect(async () => await langer.speak('en')).rejects.toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    await expect(
-      async () => await mobxLanger.resetLanguage()
-    ).rejects.toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    await expect(async () => await langer.resetLanguage()).rejects.toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    await expect(
-      async () => await mobxLanger.update(updated)
-    ).rejects.toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    await expect(async () => await langer.update(updated)).rejects.toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
   });
 
   it('error', async () => {
-    const mobxLanger = new MobxLanger();
-    expect(() => mobxLanger.availableLanguages).toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    const langer = new MobxLanger();
+    expect(() => langer.availableLanguages).toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    expect(() => mobxLanger.says).toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    expect(() => langer.says).toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    expect(() => mobxLanger.speaking).toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
-    );
-
-    await expect(async () => mobxLanger.resetLanguage()).rejects.toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
-    );
-    await expect(async () => mobxLanger.speak('en')).rejects.toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
-    );
-    await expect(async () => mobxLanger.update({})).rejects.toThrowError(
-      '[langer] Not initialized yet, failed to initialize or disposed.'
+    expect(() => langer.speaking).toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
 
-    await expect(async () => mobxLanger.initialize({})).rejects.toThrowError(
-      '[langer] initialization failed. Unable to get the list of available languages.'
+    await expect(async () => langer.resetLanguage()).rejects.toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
     );
-    expect(mobxLanger.initialized).toBeFalsy();
-    await mobxLanger.initialize(fetched);
-    expect(mobxLanger.initialized).toBeTruthy();
-    await expect(async () => mobxLanger.speak('ja')).rejects.toThrowError(
+    await expect(async () => langer.speak('en')).rejects.toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
+    );
+    await expect(async () => langer.update({})).rejects.toThrowError(
+      '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
+    );
+
+    await expect(async () => langer.initialize({})).rejects.toThrowError(
+      '[langer] Initialization failed. Unable to get the list of available languages.'
+    );
+    expect(langer.initialized).toBeFalsy();
+    await langer.initialize(fetched);
+    expect(langer.initialized).toBeTruthy();
+    await expect(async () => langer.speak('ja')).rejects.toThrowError(
       '[langer] Cannot speak the "ja" language that are not on the available languages(en,zh).'
     );
-    await expect(async () => mobxLanger.update({})).rejects.toThrowError(
-      '[langer] initialization failed. Unable to get the list of available languages.'
+    await expect(async () => langer.update({})).rejects.toThrowError(
+      '[langer] Initialization failed. Unable to get the list of available languages.'
     );
 
     clearSaved();
@@ -201,12 +186,17 @@ describe('mobxLanger', () => {
     ).rejects.toThrowError(
       '[langer] The preset language "ja" is not on the available languages(en,zh).'
     );
+
+    langer.dispose();
+    await expect(async () => langer.dispose()).rejects.toThrowError(
+      '[langer] Invalid operation. This has been disposed.'
+    );
   });
 
   it('recorder', async () => {
-    const mobxLanger = await new MobxLanger().initialize(fetched);
-    expect(mobxLanger.speaking).toBe(presetResult);
-    await mobxLanger.speak('zh');
+    const langer = await new MobxLanger().initialize(fetched);
+    expect(langer.speaking).toBe(presetResult);
+    await langer.speak('zh');
 
     const otherLanger = await new MobxLanger().initialize(updated);
     expect(otherLanger.speaking).toBe('zh');
@@ -218,32 +208,27 @@ describe('mobxLanger', () => {
   });
 
   it('preset', async () => {
-    const mobxLanger = await new MobxLanger({ preset: 'zh' }).initialize(
-      fetched
-    );
-    expect(mobxLanger.speaking).toBe('zh');
-    expect(mobxLanger.says.confirm).toBe(fetched.zh.confirm);
+    const langer = await new MobxLanger({ preset: 'zh' }).initialize(fetched);
+    expect(langer.speaking).toBe('zh');
+    expect(langer.says.confirm).toBe(fetched.zh.confirm);
   });
 
   it('warn', async () => {
-    const mobxLanger = await new MobxLanger();
-    await mobxLanger.initialize(fetched);
-    await mobxLanger.initialize(fetched);
-
-    process.env.NODE_ENV = 'development';
-    expect(console.warn).toBeCalledTimes(0);
-    await mobxLanger.initialize(fetched);
-    expect(console.warn).toBeCalledTimes(1);
-    await mobxLanger.initialize(fetched);
-    expect(console.warn).toBeCalledTimes(2);
+    const langer = await new MobxLanger();
+    await langer.initialize(fetched);
+    await expect(
+      async () => await langer.initialize(fetched)
+    ).rejects.toThrowError(
+      '[langer] Invalid operation. This has been initialized.'
+    );
   });
 
   it('async recorder', async () => {
-    const mobxLanger = await new MobxLanger({
+    const langer = await new MobxLanger({
       recorder: new AsyncDriver(),
     }).initialize(fetched);
-    expect(mobxLanger.speaking).toBe(presetResult);
-    await mobxLanger.speak('zh');
+    expect(langer.speaking).toBe(presetResult);
+    await langer.speak('zh');
 
     const otherLanger = await new MobxLanger().initialize(updated);
     expect(otherLanger.speaking).toBe('zh');
@@ -255,26 +240,34 @@ describe('mobxLanger', () => {
   });
 
   it('mobx', async () => {
-    const mobxLanger = new MobxLanger();
-    await mobxLanger.initialize(updated);
+    configure({
+      enforceActions: 'always',
+      computedRequiresReaction: true,
+      reactionRequiresObservable: true,
+      // observableRequiresReaction: true,
+      // disableErrorBoundaries: true,
+    });
+
+    const langer = new MobxLanger();
+    await langer.initialize(updated);
 
     const view1 = jest.fn(() => {
       try {
-        return `btn:${mobxLanger.says.cancel},btn:${mobxLanger.says.confirm}`;
+        return `btn:${langer.says.cancel},btn:${langer.says.confirm}`;
       } catch (error) {
         return error;
       }
     });
     const view2 = jest.fn(() => {
       try {
-        return `btn:${mobxLanger.says.enter},btn:${mobxLanger.says.setting.language},btn:${mobxLanger.says.setting.quality},btn:${mobxLanger.says.setting.volume}`;
+        return `btn:${langer.says.enter},btn:${langer.says.setting.language},btn:${langer.says.setting.quality},btn:${langer.says.setting.volume}`;
       } catch (error) {
         return error;
       }
     });
     const view3 = jest.fn(() => {
       try {
-        return `The supported languages are ${mobxLanger.availableLanguages}. The current language is ${mobxLanger.speaking}`;
+        return `The supported languages are ${langer.availableLanguages}. The current language is ${langer.speaking}`;
       } catch (error) {
         return error;
       }
@@ -297,7 +290,7 @@ describe('mobxLanger', () => {
       `The supported languages are ${'en,zh,ja'}. The current language is ${presetResult}`
     );
 
-    await mobxLanger.speak('zh');
+    await langer.speak('zh');
     expect(view1).toBeCalledTimes(2);
     expect(view1).lastReturnedWith(
       `btn:${updated.zh.cancel},btn:${updated.zh.confirm}`
@@ -311,7 +304,7 @@ describe('mobxLanger', () => {
       `The supported languages are ${'en,zh,ja'}. The current language is ${'zh'}`
     );
 
-    await mobxLanger.resetLanguage();
+    await langer.resetLanguage();
     expect(view1).toBeCalledTimes(3);
     expect(view1).lastReturnedWith(
       `btn:${updated.en.cancel},btn:${updated.en.confirm}`
@@ -325,7 +318,7 @@ describe('mobxLanger', () => {
       `The supported languages are ${'en,zh,ja'}. The current language is ${'en'}`
     );
 
-    await mobxLanger.update(fetched);
+    await langer.update(fetched);
     expect(view1).toBeCalledTimes(4);
     expect(view1).lastReturnedWith(
       `btn:${fetched.en.cancel},btn:${fetched.en.confirm}`
@@ -340,20 +333,20 @@ describe('mobxLanger', () => {
       `The supported languages are ${'en,zh'}. The current language is ${'en'}`
     );
 
-    await mobxLanger.dispose();
+    await langer.dispose();
     expect(view1).lastReturnedWith(
       new Error(
-        '[langer] Not initialized yet, failed to initialize or disposed.'
+        '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
       )
     );
     expect(view2).lastReturnedWith(
       new Error(
-        '[langer] Not initialized yet, failed to initialize or disposed.'
+        '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
       )
     );
     expect(view3).lastReturnedWith(
       new Error(
-        '[langer] Not initialized yet, failed to initialize or disposed.'
+        '[langer] Invalid operation. Not initialized yet, failed to initialize or has been disposed.'
       )
     );
   });

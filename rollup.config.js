@@ -12,7 +12,7 @@ export default [].concat(
       file: pkg.main,
       format: 'cjs',
     },
-    { external: ['mobx'] }
+    { external: ['mobx', 'langer'] }
   ),
   build(
     input,
@@ -20,7 +20,7 @@ export default [].concat(
       file: pkg.module,
       format: 'esm',
     },
-    { external: ['mobx'] }
+    { external: ['mobx', 'langer'] }
   ),
   build(
     input,

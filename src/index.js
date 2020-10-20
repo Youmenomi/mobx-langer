@@ -1,21 +1,22 @@
 //@ts-check
 
 import { Langer } from 'langer'
-import { makeAutoObservable } from 'mobx'
+import { action, makeObservable, observable } from 'mobx'
 
 export * from 'langer'
 
 export function MobxLanger(options) {
-  return makeAutoObservable(new Langer(options), {
+  return makeObservable(new Langer(options), {
     //@ts-expect-error
-    _recorder: false,
-    _preset: false,
-    initialize: false,
-    internalUpdate: false,
-    update: false,
-    changeSays: false,
-    speak: false,
-    resetLanguage: false,
-    dispose: false,
+    _says: observable,
+    _availableLanguages: observable,
+    _currLanguage: observable,
+    _initialized: observable,
+    _disposed: observable,
+    setSays: action,
+    setAvailableLanguages: action,
+    setCurrLanguage: action,
+    setInitialized: action,
+    dispose: action,
   })
 }
