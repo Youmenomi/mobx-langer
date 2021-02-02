@@ -1,9 +1,9 @@
 //@ts-check
 
-import { Langer as originalLanger } from './original'
+import { Langer as originalLanger } from 'langer'
 import { action, makeObservable, observable, computed } from 'mobx'
 
-export * from './original'
+export * from 'langer'
 
 export function Langer(options) {
   return makeObservable(new originalLanger(options), {

@@ -1,4 +1,4 @@
-import { Langer as originalLanger, Options } from './original';
+import { Langer as OriginalLanger, Options } from 'langer';
 
 export * from 'langer';
 
@@ -7,6 +7,6 @@ export declare class Langer<
   TSays = any,
   TLangs extends string[] = string[],
   TDriver = undefined
-> extends originalLanger<TSays, TLangs, TDriver> {
+> extends OriginalLanger<TSays, TLangs, TDriver> {
   constructor(options?: Options<TDriver, TSays, TLangs>);
 }
