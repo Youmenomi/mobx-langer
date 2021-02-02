@@ -1,12 +1,12 @@
-import { Langer, Options } from 'langer';
-import { Dictionary } from 'langer/dist/types/helper';
+import { Langer as originalLanger, Options } from './original';
 
 export * from 'langer';
 
-export declare class MobxLanger<TData = Dictionary> extends Langer<TData> {
-  constructor(options?: Options);
-  update<T extends Dictionary = Dictionary>(
-    data: T,
-    reset?: boolean
-  ): Promise<MobxLanger<T>>;
+/* istanbul ignore next */
+export declare class Langer<
+  TSays = any,
+  TLangs extends string[] = string[],
+  TDriver = undefined
+> extends originalLanger<TSays, TLangs, TDriver> {
+  constructor(options?: Options<TDriver, TSays, TLangs>);
 }

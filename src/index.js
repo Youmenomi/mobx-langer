@@ -1,12 +1,12 @@
 //@ts-check
 
-import { Langer } from 'langer'
-import { action, makeObservable, observable } from 'mobx'
+import { Langer as originalLanger } from './original'
+import { action, makeObservable, observable, computed } from 'mobx'
 
-export * from 'langer'
+export * from './original'
 
-export function MobxLanger(options) {
-  return makeObservable(new Langer(options), {
+export function Langer(options) {
+  return makeObservable(new originalLanger(options), {
     //@ts-expect-error
     _says: observable,
     _availableLanguages: observable,
@@ -18,5 +18,12 @@ export function MobxLanger(options) {
     setCurrLanguage: action,
     setInitialized: action,
     dispose: action,
+    availableLanguages: computed,
+    initialize: action,
+    restore: action,
+    isAvailable: action,
+    speak: action,
+    reset: action,
+    boost: action,
   })
 }
