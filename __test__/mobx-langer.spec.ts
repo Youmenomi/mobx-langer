@@ -16,7 +16,7 @@ import {
 
 configure({
   enforceActions: 'always',
-  computedRequiresReaction: true,
+  // computedRequiresReaction: true,
   reactionRequiresObservable: true,
   // observableRequiresReaction: true,
   // disableErrorBoundaries: true,
